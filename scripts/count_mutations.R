@@ -13,20 +13,31 @@ data_unfilt <- bind_rows(data4)
 #create filtered dataset
 data_filt <- bind_rows(data4c)
 
-x <- data4[[1]]
+x <- data4[[34]]
 head(x)
 
+#################################################
+#################FUNCTIONS TO USE###############
+
+#############################################
 #function to count number of fixed mutations
 count_fixed <- function(x){
   nrow(x[x$frequency > 99,])
 }
 
+########################################################
+#function to count number of fixed mutations per species
+count_fixed_per_species <- function(x,species){
+  nrow(x[x$frequency > 99 & x$mut_sp_origin == species,])
+}
+
+#########################################################
+#function to count mutation categories
 
 #find all types of mutations
 mutation_categories <- unique(data_unfilt$mutation_category)
 #drop the <NA>, the last value
 mutation_categories[-length(mutation_categories)]
-
 #function to find types of mutation categories
 count_mut_cat <- function(x,mutation_category){
   nrow(x[x$mutation_category == as.character(mutation_category),])
@@ -71,8 +82,14 @@ data_unfilt %>%
     mutations_from_B = map(.x = data, species = species[2], .f = count_mut_sp_origin),
     mutations_from_C = map(.x = data, species = species[3], .f = count_mut_sp_origin),
     mutations_from_D = map(.x = data, species = species[4], .f = count_mut_sp_origin),
+    fixed_mutations_from_A = map(.x = data, species = species[1], .f = count_fixed_per_species),
+    fixed_mutations_from_B = map(.x = data, species = species[2], .f = count_fixed_per_species),
+    fixed_mutations_from_C = map(.x = data, species = species[3], .f = count_fixed_per_species),
+    fixed_mutations_from_D = map(.x = data, species = species[4], .f = count_fixed_per_species),
         ) %>%
-unnest(cols = c(5:ncol(.)))
+unnest(cols = c(5:ncol(.))) %>%
+select(-data) %>%
+unite("Label",c("community", "replicate", "time"), sep = "_", remove = FALSE)
 
 data_filt %>%
   group_by(replicate,time,community) %>%
@@ -101,9 +118,17 @@ data_filt %>%
     mutations_from_B = map(.x = data, species = species[2], .f = count_mut_sp_origin),
     mutations_from_C = map(.x = data, species = species[3], .f = count_mut_sp_origin),
     mutations_from_D = map(.x = data, species = species[4], .f = count_mut_sp_origin),
+    fixed_mutations_from_A = map(.x = data, species = species[1], .f = count_fixed_per_species),
+    fixed_mutations_from_B = map(.x = data, species = species[2], .f = count_fixed_per_species),
+    fixed_mutations_from_C = map(.x = data, species = species[3], .f = count_fixed_per_species),
+    fixed_mutations_from_D = map(.x = data, species = species[4], .f = count_fixed_per_species),
   ) %>%
-  unnest(cols = c(5:ncol(.)))
+  unnest(cols = c(5:ncol(.))) %>%
+  select(-data) %>%
+  unite("Label",c("community", "replicate", "time"), sep = "_", remove = FALSE)
 
+x %>%
+  filter(community == "ABCD")
 
 gsub("ep_","",data_filt$replicate)
 
@@ -113,3 +138,5 @@ load(here("coverage_data/data_cov.RData"))
 
 head(data_cov)
      
+as_tibble(data_cov) %>%
+  filter(community == "ABCD")
