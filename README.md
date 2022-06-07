@@ -1,2 +1,2 @@
-# Variant Discover in Bacterial Genomes
+# Variant Discovery in Bacterial Genomes
 Analysis of Breseq Data
