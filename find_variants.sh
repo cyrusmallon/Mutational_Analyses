@@ -21,6 +21,7 @@ sorted_R2=($(sort -d <<<"${R2[*]}"))
 unset IFS
 
 #pipe loop to parallel command
+#set breseq parameters
 cnt=${#sorted_R2[@]} 
 for ((i=0;i<cnt;i++)); do
 breseq -p \
